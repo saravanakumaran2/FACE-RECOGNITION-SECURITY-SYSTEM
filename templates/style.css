@@ -1,0 +1,72 @@
+/* static/styles.css */
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-family: Arial, sans-serif; /* Example font-family */
+    background-color: #f8f9fa; /* Lighter background color for the entire page */
+}
+
+.content {
+    max-width: 600px; /* Limit content width for better readability */
+    padding: 20px;
+    background-color: #ffffff; /* White background */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Soft shadow */
+}
+
+h1 {
+    color: #333; /* Dark text color */
+}
+
+p {
+    line-height: 1.6; /* Improved readability */
+    color: #666; /* Medium gray text color */
+}
+
+a {
+    color: #007bff; /* Blue link color */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+form {
+    text-align: left; /* Align form elements to the left */
+    margin-top: 20px; /* Separate form from heading */
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #666; /* Medium gray text color */
+}
+
+input[type="text"], input[type="password"], button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc; /* Light gray border */
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #007bff; /* Blue button background */
+    color: #fff; /* White text color */
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.error-message {
+    color: red; /* Red error message color */
+}

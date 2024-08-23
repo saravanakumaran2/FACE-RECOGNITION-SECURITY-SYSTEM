@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212; /* Black background */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+            color: #e0e0e0; /* Light text color */
+        }
+        .container {
+            max-width: 800px;
+            background-color: #1e1e1e; /* Dark grey background for container */
+            padding: 20px;
+            border-radius: 12px; /* Rounded corners */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Strong shadow for depth */
+            text-align: center;
+            border: 1px solid #333; /* Border to define the content box */
+        }
+        .profile-header h1 {
+            color: #ff6f61; /* Accent color for headings */
+            margin-bottom: 20px;
+        }
+        .security-profiles {
+            margin-bottom: 20px;
+        }
+        .security-profiles ul {
+            list-style-type: none;
+            padding: 0;
+            text-align: center;
+        }
+        .security-profiles li {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .security-profiles li a {
+            color: #4caf50; /* Link color */
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .security-profiles li a:hover {
+            color: #388e3c; /* Darker green on hover */
+        }
+        .add-profile {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .add-profile a {
+            text-decoration: none;
+            color: #ff6f61; /* Accent color for link */
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        .add-profile a:hover {
+            color: #e65c54; /* Darker accent color on hover */
+        }
+        .logout {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .logout a {
+            text-decoration: none;
+            color: #fff;
+            background-color: #dc3545; /* Red background */
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .logout a:hover {
+            background-color: #c82333; /* Darker red on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="logout">
+        <a href="{{ url_for('login') }}">Logout</a>
+    </div>
+    <div class="container">
+        <div class="profile-header">
+            <h1>Hi, {{ username }}</h1>
+        </div>
+        
+        <div class="security-profiles">
+            <h2>Your Profiles</h2>
+            <ul>
+                {% for profile in profiles %}
+                <li>
+                    <a href="{{ url_for('view_images', username=username, profile_name=profile.profile_name) }}">
+                        {{ profile.profile_name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="add-profile">
+            <a href="{{ url_for('security') }}">Add Profile</a>
+        </div>
+    </div>
+</body>
+</html>

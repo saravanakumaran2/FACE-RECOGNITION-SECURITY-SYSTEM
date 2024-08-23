@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Setup</title>
+    <style>
+        /* Custom styles */
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .content {
+            max-width: 600px;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            position: relative;
+            text-align: center;
+        }
+        h1 {
+            color: #ff6f61;
+        }
+        #cameraContainer {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 50px;
+        }
+        #videoContainer {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-bottom: 20px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid #28a745;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #000;
+        }
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #wave {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 5px solid transparent;
+            border-top-color: #28a745;
+            box-sizing: border-box;
+            animation: rotateWave 2s linear infinite, pulseWave 1s infinite;
+        }
+        @keyframes rotateWave {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes pulseWave {
+            0% {
+                border-width: 5px;
+            }
+            50% {
+                border-width: 15px;
+            }
+            100% {
+                border-width: 5px;
+            }
+        }
+        #instruction {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #666;
+        }
+        #buttons {
+            margin-top: 20px;
+        }
+        #captureButton, #submitBtn, #retakeButton, #startButton {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 0 10px;
+        }
+        #errorMessage {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .top-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .top-buttons a {
+            text-decoration: none;
+            color: #fff;
+            background-color: #dc3545;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .top-buttons a:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div class="top-buttons">
+            <div class="logout">
+                <a href="{{ url_for('login') }}">Logout</a>
+            </div>
+            <div class="back-profile">
+                <a href="{{ url_for('profile_page', username=username) }}">Back to Profile</a>
+            </div>
+        </div>
+        <h1>Welcome, {{ username }}</h1>
+        <div id="cameraContainer">
+            <div id="videoContainer">
+                <video id="video" autoplay></video>
+                <div id="wave"></div>
+            </div>
+            <p id="instruction">Position your face within the circle. Ensure your face is fully visible.</p>
+            <div id="buttons">
+                <button id="startButton">Start Camera</button>
+                <button id="captureButton" style="display: none;">Capture Image</button>
+                <button id="submitBtn" style="display: none;">Submit Images</button>
+                <button id="retakeButton" style="display: none;">Retake Image</button>
+            </div>
+            <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
+            <p id="errorMessage"></p>
+        </div>
+
+        <script>
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const startButton = document.getElementById('startButton');
+            const captureButton = document.getElementById('captureButton');
+            const submitBtn = document.getElementById('submitBtn');
+            const retakeButton = document.getElementById('retakeButton');
+            const errorMessage = document.getElementById('errorMessage');
+            const wave = document.getElementById('wave');
+
+            let stream;
+            let imageCount = 0;
+            let imageDataArray = [];
+
+            async function startCamera() {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = stream;
+                } catch (err) {
+                    console.error('Error accessing webcam:', err);
+                }
+            }
+
+            function updateWave() {
+                const waveThickness = imageCount * 2; // Increase thickness with each capture
+                wave.style.borderWidth = `${waveThickness}px`;
+            }
+
+            startButton.addEventListener('click', async () => {
+                await startCamera();
+                startButton.style.display = 'none';
+                captureButton.style.display = 'inline-block';
+                errorMessage.textContent = '';
+            });
+
+            captureButton.addEventListener('click', () => {
+                const context = canvas.getContext('2d');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                const imageData = canvas.toDataURL('image/png');
+                if (imageDataIsValid(imageData)) {
+                    imageDataArray.push(imageData);
+                    imageCount++;
+                    updateWave();
+                    if (imageCount >= 8) {
+                        captureButton.style.display = 'none';
+                        submitBtn.style.display = 'inline-block';
+                    } else {
+                        retakeButton.style.display = 'inline-block';
+                    }
+                } else {
+                    errorMessage.textContent = 'No face detected. Please position your face correctly and try again.';
+                }
+            });
+
+            retakeButton.addEventListener('click', () => {
+                captureButton.style.display = 'inline-block';
+                submitBtn.style.display = 'none';
+                retakeButton.style.display = 'none';
+                errorMessage.textContent = '';
+            });
+
+            function imageDataIsValid(imageData) {
+                return imageData.trim() !== '';
+            }
+
+            submitBtn.addEventListener('click', () => {
+                const profileName = prompt('Enter profile name:');
+                if (profileName && imageDataArray.length > 0) {
+                    // Create a form element and submit the data
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = "{{ url_for('security', username=username) }}";
+
+                    const profileNameInput = document.createElement('input');
+                    profileNameInput.type = 'hidden';
+                    profileNameInput.name = 'profile_name';
+                    profileNameInput.value = profileName;
+                    form.appendChild(profileNameInput);
+
+                    const imageDataInput = document.createElement('input');
+                    imageDataInput.type = 'hidden';
+                    imageDataInput.name = 'imageData';
+                    imageDataInput.value = JSON.stringify(imageDataArray);
+                    form.appendChild(imageDataInput);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                } else {
+                    errorMessage.textContent = 'Please capture at least 8 images before submitting.';
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>
